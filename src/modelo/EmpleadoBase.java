@@ -29,7 +29,16 @@ public class EmpleadoBase {
         if (salarioBase >= 0) {
             this.salarioBase = salarioBase;
         } else {
-            this.salarioBase = 0; 
+            this.salarioBase = 0;
         }
+    }
+
+    // Métodos que las clases hijas podrán SOBRESCRIBIR (polimorfismo)
+    public double calcularSalarioTotal() {
+        return salarioBase;
+    }
+
+    public String getTipo() {
+        return "Operativo";
     }
 }
