@@ -9,9 +9,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
 
-/**
- * La ventana del sistema. Muestra la interfaz gráfica y delega las decisiones al controlador.
- */
+
 public class VentanaEmpleados extends JFrame {
 
     private final EmpleadoControlador controlador;
@@ -117,7 +115,6 @@ public class VentanaEmpleados extends JFrame {
         return String.format("$ %,.0f", valor);
     }
 
-    // ================= EVENTOS =================
     private void conectarEventos() {
         cmbTipo.addActionListener(e -> {
             boolean esAdministrativo = tipoSeleccionado().equals("Administrativo");
