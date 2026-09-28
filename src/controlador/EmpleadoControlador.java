@@ -2,12 +2,13 @@ package controlador;
 
 import modelo.EmpleadoAdministrativo;
 import modelo.EmpleadoBase;
+import modelo.EmpleadoComercial;
 import modelo.RepositorioEmpleados;
 import java.util.ArrayList;
 
 public class EmpleadoControlador {
-
-    public static final String[] TIPOS_EMPLEADO = {"Operativo", "Administrativo"};
+    // Array actualizado con la tercera opción del Reto Final
+    public static final String[] TIPOS_EMPLEADO = {"Operativo", "Administrativo", "Comercial"};
 
     private final RepositorioEmpleados repositorio;
     private final ArrayList<String> historial;
@@ -19,13 +20,16 @@ public class EmpleadoControlador {
     }
 
     private void cargarDatosDePrueba() {
-        String[] cedulas = {"1001", "1002", "1003", "1004"};
-        String[] nombres = {"Ana Torres", "Luis Gómez", "Marta Ríos", "Pedro Cano"};
-        double[] salarios = {1800000, 2500000, 1750000, 3200000};
+        String[] cedulas = {"1001", "1002", "1003", "1004", "1005"};
+        String[] nombres = {"Ana Torres", "Luis Gómez", "Marta Ríos", "Pedro Cano", "Carlos Ruíz"};
+        double[] salarios = {1800000, 2500000, 1750000, 3200000, 2000000};
 
         for (int i = 0; i < cedulas.length; i++) {
             EmpleadoBase empleado;
-            if (i % 2 == 0) {
+            if (i == 4) {
+                // Empleado comercial de prueba (10% de comisión)
+                empleado = new EmpleadoComercial(cedulas[i], nombres[i], salarios[i], 10);
+            } else if (i % 2 == 0) {
                 empleado = new EmpleadoBase(cedulas[i], nombres[i], salarios[i]);
             } else {
                 empleado = new EmpleadoAdministrativo(cedulas[i], nombres[i], salarios[i], 300000);
@@ -35,7 +39,7 @@ public class EmpleadoControlador {
     }
 
     private boolean esNumeroValido(String texto) {
-        if (texto.isEmpty() || texto.equals(".")) {
+        if (texto == null || texto.isEmpty() || texto.equals(".")) {
             return false;
         }
         int puntos = 0;
@@ -50,34 +54,47 @@ public class EmpleadoControlador {
         return puntos <= 1;
     }
 
-    private String validar(String cedula, String nombre, String salario, String tipo, String bonificacion) {
+    private String validar(String cedula, String nombre, String salario, String tipo, String bonificacionComision) {
         if (cedula.isEmpty() || nombre.isEmpty()) {
             return "La cédula y el nombre son obligatorios.";
         }
         if (!esNumeroValido(salario)) {
             return "El salario debe ser un número positivo (sin puntos de miles).";
         }
-        if (tipo.equals("Administrativo") && !esNumeroValido(bonificacion)) {
-            return "La bonificación debe ser un número positivo.";
+        if (tipo.equals("Administrativo")) {
+            if (!esNumeroValido(bonificacionComision)) {
+                return "La bonificación debe ser un número positivo.";
+            }
+        } else if (tipo.equals("Comercial")) {
+            if (!esNumeroValido(bonificacionComision)) {
+                return "El porcentaje de comisión debe ser un número positivo.";
+            }
+            double comision = Double.parseDouble(bonificacionComision);
+            if (comision > 50) {
+                return "La comisión no puede ser mayor al 50%.";
+            }
         }
         return null;
     }
 
-    private EmpleadoBase construirEmpleado(String cedula, String nombre, String salario, String tipo, String bonificacion) {
+    private EmpleadoBase construirEmpleado(String cedula, String nombre, String salario, String tipo, String bonificacionComision) {
         double salarioBase = Double.parseDouble(salario);
         if (tipo.equals("Administrativo")) {
-            double bono = Double.parseDouble(bonificacion);
+            double bono = Double.parseDouble(bonificacionComision);
             return new EmpleadoAdministrativo(cedula, nombre, salarioBase, bono);
+        } else if (tipo.equals("Comercial")) {
+            double comision = Double.parseDouble(bonificacionComision);
+            return new EmpleadoComercial(cedula, nombre, salarioBase, comision);
         }
         return new EmpleadoBase(cedula, nombre, salarioBase);
     }
 
-    public String agregarEmpleado(String cedula, String nombre, String salario, String tipo, String bonificacion) {
-        String error = validar(cedula, nombre, salario, tipo, bonificacion);
+    public String agregarEmpleado(String cedula, String nombre, String salario, String tipo, String bonificacionComision) {
+        String error = validar(cedula, nombre, salario, tipo, bonificacionComision);
         if (error != null) {
             return error;
         }
-        EmpleadoBase nuevo = construirEmpleado(cedula, nombre, salario, tipo, bonificacion);
+        EmpleadoBase nuevo = construirEmpleado(cedula, nombre, salario, tipo, bonificacionComision);
         if (repositorio.agregar(nuevo)) {
             historial.add("AGREGADO: " + cedula + " - " + nombre);
             return "Empleado agregado correctamente.";
@@ -90,12 +107,12 @@ public class EmpleadoControlador {
         return repositorio.buscar(cedula);
     }
 
-    public String actualizarEmpleado(String cedula, String nombre, String salario, String tipo, String bonificacion) {
-        String error = validar(cedula, nombre, salario, tipo, bonificacion);
+    public String actualizarEmpleado(String cedula, String nombre, String salario, String tipo, String bonificacionComision) {
+        String error = validar(cedula, nombre, salario, tipo, bonificacionComision);
         if (error != null) {
             return error;
         }
-        EmpleadoBase actualizado = construirEmpleado(cedula, nombre, salario, tipo, bonificacion);
+        EmpleadoBase actualizado = construirEmpleado(cedula, nombre, salario, tipo, bonificacionComision);
         if (repositorio.actualizar(actualizado)) {
             historial.add("ACTUALIZADO: " + cedula + " - " + nombre);
             return "Empleado actualizado correctamente.";
