@@ -1,4 +1,38 @@
 package controlador;
 
+import modelo.EmpleadoAdministrativo;
+import modelo.EmpleadoBase;
+import modelo.RepositorioEmpleados;
+import java.util.ArrayList;
+
 public class EmpleadoControlador {
+
+    // Array: lista FIJA de tipos de empleado
+    public static final String[] TIPOS_EMPLEADO = {"Operativo", "Administrativo"};
+
+    private final RepositorioEmpleados repositorio;
+    private final ArrayList<String> historial;
+
+    public EmpleadoControlador() {
+        repositorio = new RepositorioEmpleados();
+        historial = new ArrayList<>();
+        cargarDatosDePrueba();
+    }
+
+    // Carga 4 empleados de ejemplo usando arrays paralelos y un ciclo for
+    private void cargarDatosDePrueba() {
+        String[] cedulas = {"1001", "1002", "1003", "1004"};
+        String[] nombres = {"Ana Torres", "Luis Gómez", "Marta Ríos", "Pedro Cano"};
+        double[] salarios = {1800000, 2500000, 1750000, 3200000};
+
+        for (int i = 0; i < cedulas.length; i++) {
+            EmpleadoBase empleado;
+            if (i % 2 == 0) {
+                empleado = new EmpleadoBase(cedulas[i], nombres[i], salarios[i]);
+            } else {
+                empleado = new EmpleadoAdministrativo(cedulas[i], nombres[i], salarios[i], 300000);
+            }
+            repositorio.agregar(empleado);
+        }
+    }
 }
